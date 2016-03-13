@@ -22,9 +22,11 @@ public class FileResource {
     @GET 
     @Path("getIt")
     @Produces("text/plain")
-    public String getIt(String fileName) {
+    public String getIt(String fileName) throws IOException {
+    	
+		HdfsOperator hdfs = new HdfsOperator();
 
-        return "Hi there!"+fileName;
+        return hdfs.getIt();
     }
     
     /**
@@ -212,4 +214,32 @@ public class FileResource {
     	}
     	
     }
+
+    @PUT
+    @Path("storeToHDFS/{fileName}")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    
+	public Response storeToHDFS(@PathParam("fileName") String fileName, 
+			@FormDataParam("file") InputStream is) throws IOException{
+	    
+		HdfsOperator hdfs = new HdfsOperator();
+	    
+	    try {
+ 
+	    	hdfs.getOutputStream("/user/root/"+fileName, is);
+	    
+	    } finally {
+	        
+	        if (is != null){
+	            try {
+	                is.close();
+	            } catch(IOException e) {
+	                e.printStackTrace();
+	            }
+	        } 
+	    }
+	    
+	    return Response.ok("OK").build();
+	    
+	}    
 }
